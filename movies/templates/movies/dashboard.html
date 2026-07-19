@@ -1,0 +1,367 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}AI Movie Recommendations{% endblock %}
+
+{% block content %}
+<!-- Hero Banner -->
+{% if featured_movie %}
+<div class="hero-banner"
+    style="background-image: url('https://image.tmdb.org/t/p/original{{ featured_movie.backdrop_path }}');">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">{{ featured_movie.title }}</h1>
+            <p class="hero-overview">{{ featured_movie.overview|truncatechars:200 }}</p>
+            <div class="mt-3">
+                <a href="{% url 'movies:movie_detail' featured_movie.id %}" class="btn btn-danger btn-lg">
+                    <i class="fas fa-play"></i> Watch Now
+                </a>
+                <button class="btn btn-outline-light btn-lg ms-2"
+                    onclick="toggleWatchlist('{{ featured_movie.id }}', '{{ featured_movie.title }}', '{{ featured_movie.poster_path }}')">
+                    <i class="fas fa-plus"></i> Add to Watchlist
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="container py-4">
+    <!-- AI Personalized Recommendations -->
+    {% if ai_recommendations %}
+    <section class="mb-5">
+        <div class="section-header">
+            <h2>
+                <i class="fas fa-robot text-primary"></i> AI Personalized Picks
+                <small class="text-muted fs-6">Based on your behavior</small>
+            </h2>
+            <a href="{% url 'movies:recommendations' %}" class="view-all">View All →</a>
+        </div>
+        <div class="row g-3">
+            {% for movie in ai_recommendations %}
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="movie-card" onclick="window.location.href='{% url 'movies:movie_detail' movie.id %}'">
+                    <div class="poster-wrapper">
+                        {% if movie.poster_path %}
+                        <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}"
+                            loading="lazy">
+                        {% else %}
+                        <img src="{% static 'images/no-poster.png' %}" alt="No poster" loading="lazy">
+                        {% endif %}
+                        <div class="card-overlay"></div>
+                        <div class="card-actions">
+                            <button class="btn-icon like-btn" data-movie-id="{{ movie.id }}"
+                                onclick="event.stopPropagation(); toggleLike('{{ movie.id }}')">
+                                <i class="far fa-thumbs-up"></i>
+                            </button>
+                            <button class="btn-icon watchlist-btn" data-movie-id="{{ movie.id }}"
+                                onclick="event.stopPropagation(); toggleWatchlist('{{ movie.id }}')">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="movie-title">{{ movie.title }}</h6>
+                        <div class="movie-meta">
+                            <span>{{ movie.release_date|slice:":4"|default:"N/A" }}</span>
+                            <span class="rating">
+                                <i class="fas fa-star"></i> {{ movie.vote_average|floatformat:1|default:"N/A" }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Trending Recommendations -->
+    {% if trending_recommendations %}
+    <section class="mb-5">
+        <div class="section-header">
+            <h2>
+                <i class="fas fa-fire text-danger"></i> Trending For You
+                <small class="text-muted fs-6">Personalized trending</small>
+            </h2>
+        </div>
+        <div class="row g-3">
+            {% for movie in trending_recommendations %}
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="movie-card" onclick="window.location.href='{% url 'movies:movie_detail' movie.id %}'">
+                    <div class="poster-wrapper">
+                        {% if movie.poster_path %}
+                        <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}"
+                            loading="lazy">
+                        {% else %}
+                        <img src="{% static 'images/no-poster.png' %}" alt="No poster" loading="lazy">
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h6 class="movie-title">{{ movie.title }}</h6>
+                        <div class="movie-meta">
+                            <span>{{ movie.release_date|slice:":4"|default:"N/A" }}</span>
+                            <span class="rating">
+                                <i class="fas fa-star"></i> {{ movie.vote_average|floatformat:1|default:"N/A" }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Explore New Genres -->
+    {% if explore_recommendations %}
+    <section class="mb-5">
+        <div class="section-header">
+            <h2>
+                <i class="fas fa-compass text-success"></i> Explore New Genres
+                <small class="text-muted fs-6">Based on your viewing patterns</small>
+            </h2>
+        </div>
+        <div class="row g-3">
+            {% for movie in explore_recommendations %}
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="movie-card" onclick="window.location.href='{% url 'movies:movie_detail' movie.id %}'">
+                    <div class="poster-wrapper">
+                        {% if movie.poster_path %}
+                        <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}"
+                            loading="lazy">
+                        {% else %}
+                        <img src="{% static 'images/no-poster.png' %}" alt="No poster" loading="lazy">
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h6 class="movie-title">{{ movie.title }}</h6>
+                        <div class="movie-meta">
+                            <span>{{ movie.release_date|slice:":4"|default:"N/A" }}</span>
+                            <span class="rating">
+                                <i class="fas fa-star"></i> {{ movie.vote_average|floatformat:1|default:"N/A" }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Discover from Similar Users -->
+    {% if discover_recommendations %}
+    <section class="mb-5">
+        <div class="section-header">
+            <h2>
+                <i class="fas fa-users text-info"></i> Discovered for You
+                <small class="text-muted fs-6">Users with similar taste</small>
+            </h2>
+        </div>
+        <div class="row g-3">
+            {% for movie in discover_recommendations %}
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="movie-card" onclick="window.location.href='{% url 'movies:movie_detail' movie.id %}'">
+                    <div class="poster-wrapper">
+                        {% if movie.poster_path %}
+                        <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}"
+                            loading="lazy">
+                        {% else %}
+                        <img src="{% static 'images/no-poster.png' %}" alt="No poster" loading="lazy">
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h6 class="movie-title">{{ movie.title }}</h6>
+                        <div class="movie-meta">
+                            <span>{{ movie.release_date|slice:":4"|default:"N/A" }}</span>
+                            <span class="rating">
+                                <i class="fas fa-star"></i> {{ movie.vote_average|floatformat:1|default:"N/A" }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Popular Movies -->
+    {% if popular_movies %}
+    <section class="mb-5">
+        <div class="section-header">
+            <h2>
+                <i class="fas fa-star text-warning"></i> Popular Now
+            </h2>
+        </div>
+        <div class="row g-3">
+            {% for movie in popular_movies %}
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="movie-card" onclick="window.location.href='{% url 'movies:movie_detail' movie.id %}'">
+                    <div class="poster-wrapper">
+                        {% if movie.poster_path %}
+                        <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}"
+                            loading="lazy">
+                        {% else %}
+                        <img src="{% static 'images/no-poster.png' %}" alt="No poster" loading="lazy">
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h6 class="movie-title">{{ movie.title }}</h6>
+                        <div class="movie-meta">
+                            <span>{{ movie.release_date|slice:":4"|default:"N/A" }}</span>
+                            <span class="rating">
+                                <i class="fas fa-star"></i> {{ movie.vote_average|floatformat:1|default:"N/A" }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Top Rated -->
+    {% if top_rated_movies %}
+    <section class="mb-5">
+        <div class="section-header">
+            <h2>
+                <i class="fas fa-trophy text-warning"></i> Top Rated
+            </h2>
+        </div>
+        <div class="row g-3">
+            {% for movie in top_rated_movies %}
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="movie-card" onclick="window.location.href='{% url 'movies:movie_detail' movie.id %}'">
+                    <div class="poster-wrapper">
+                        {% if movie.poster_path %}
+                        <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}"
+                            loading="lazy">
+                        {% else %}
+                        <img src="{% static 'images/no-poster.png' %}" alt="No poster" loading="lazy">
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h6 class="movie-title">{{ movie.title }}</h6>
+                        <div class="movie-meta">
+                            <span>{{ movie.release_date|slice:":4"|default:"N/A" }}</span>
+                            <span class="rating">
+                                <i class="fas fa-star"></i> {{ movie.vote_average|floatformat:1|default:"N/A" }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Upcoming Movies -->
+    {% if upcoming_movies %}
+    <section class="mb-5">
+        <div class="section-header">
+            <h2>
+                <i class="fas fa-calendar-alt text-success"></i> Coming Soon
+            </h2>
+        </div>
+        <div class="row g-3">
+            {% for movie in upcoming_movies %}
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="movie-card" onclick="window.location.href='{% url 'movies:movie_detail' movie.id %}'">
+                    <div class="poster-wrapper">
+                        {% if movie.poster_path %}
+                        <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}"
+                            loading="lazy">
+                        {% else %}
+                        <img src="{% static 'images/no-poster.png' %}" alt="No poster" loading="lazy">
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h6 class="movie-title">{{ movie.title }}</h6>
+                        <div class="movie-meta">
+                            <span>{{ movie.release_date|slice:":4"|default:"TBA" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999;"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add watch time tracking
+    document.addEventListener('DOMContentLoaded', function () {
+        // Track watch time on movie detail pages
+        const movieDetailContainer = document.querySelector('.movie-detail-hero');
+        if (movieDetailContainer) {
+            const movieId = window.location.pathname.split('/').filter(Boolean).pop();
+            let startTime = Date.now();
+
+            // Track time spent on page
+            window.addEventListener('beforeunload', function () {
+                const timeSpent = (Date.now() - startTime) / 1000; // seconds
+                if (timeSpent > 30) { // Only track if more than 30 seconds
+                    fetch(`/movies/api/watch-time/${movieId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({
+                            duration: timeSpent,
+                            percentage: 50 // Approximate
+                        })
+                    });
+                }
+            });
+        }
+    });
+
+    // Initialize watchlist and like status
+    document.addEventListener('DOMContentLoaded', function () {
+        {% if user_prefs %}
+        {% for movie_id in user_prefs.watchlist_ids %}
+        updateWatchlistIcon('{{ movie_id }}', true);
+        {% endfor %}
+        {% for movie_id in user_prefs.liked_ids %}
+        updateLikeIcon('{{ movie_id }}', true);
+        {% endfor %}
+        {% endif %}
+    });
+
+    // Refresh recommendations button
+    function refreshRecommendations() {
+        showToast('Refreshing recommendations...', 'info');
+        fetch('/movies/api/refresh-recommendations/', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showToast('Recommendations refreshed!', 'success');
+                    location.reload();
+                } else {
+                    showToast('Error refreshing recommendations', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Error refreshing recommendations', 'danger');
+            });
+    }
+</script>
+{% endblock %}

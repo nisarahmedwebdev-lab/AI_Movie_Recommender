@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AI Movie Recommender{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Custom CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'movies:dashboard' %}">
+                <i class="fas fa-film me-2"></i>AI Movies
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'movies:dashboard' %}">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'movies:trending' %}">
+                            <i class="fas fa-fire"></i> Trending
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'movies:recommendations' %}">
+                            <i class="fas fa-robot"></i> Recommended
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-tags"></i> Genres
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'movies:genre_movies' 'action' %}">Action</a></li>
+                            <li><a class="dropdown-item"
+                                    href="{% url 'movies:genre_movies' 'adventure' %}">Adventure</a></li>
+                            <li><a class="dropdown-item"
+                                    href="{% url 'movies:genre_movies' 'animation' %}">Animation</a></li>
+                            <li><a class="dropdown-item" href="{% url 'movies:genre_movies' 'comedy' %}">Comedy</a></li>
+                            <li><a class="dropdown-item" href="{% url 'movies:genre_movies' 'crime' %}">Crime</a></li>
+                            <li><a class="dropdown-item" href="{% url 'movies:genre_movies' 'drama' %}">Drama</a></li>
+                            <li><a class="dropdown-item" href="{% url 'movies:genre_movies' 'family' %}">Family</a></li>
+                            <li><a class="dropdown-item" href="{% url 'movies:genre_movies' 'fantasy' %}">Fantasy</a>
+                            </li>
+                            <li><a class="dropdown-item" href="{% url 'movies:genre_movies' 'horror' %}">Horror</a></li>
+                            <li><a class="dropdown-item" href="{% url 'movies:genre_movies' 'mystery' %}">Mystery</a>
+                            </li>
+                            <li><a class="dropdown-item" href="{% url 'movies:genre_movies' 'romance' %}">Romance</a>
+                            </li>
+                            <li><a class="dropdown-item" href="{% url 'movies:genre_movies' 'sci-fi' %}">Sci-Fi</a></li>
+                            <li><a class="dropdown-item" href="{% url 'movies:genre_movies' 'thriller' %}">Thriller</a>
+                            </li>
+                            <li><a class="dropdown-item" href="{% url 'movies:genre_movies' 'war' %}">War</a></li>
+                            <li><a class="dropdown-item"
+                                    href="{% url 'movies:genre_movies' 'documentary' %}">Documentary</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'movies:watchlist' %}">
+                            <i class="fas fa-heart"></i> Watchlist
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Search Form -->
+                <form class="d-flex me-3" action="{% url 'movies:search' %}" method="GET">
+                    <input class="form-control me-2" type="search" name="q" placeholder="Search movies..."
+                        aria-label="Search">
+                    <button class="btn btn-outline-light" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">
+                                    <i class="fas fa-id-card"></i> Profile
+                                </a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'accounts:logout' %}">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ movie.title }} - AI Movie Recommender{% endblock %}
+
+{% block content %}
+<!-- Movie Detail Hero -->
+<div class="movie-detail-hero"
+    style="background-image: url('https://image.tmdb.org/t/p/original{{ movie.backdrop_path }}');">
+    <div class="container">
+        <div class="movie-detail-content">
+            <div class="row">
+                <div class="col-md-3">
+                    <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}"
+                        class="img-fluid movie-detail-poster">
+                </div>
+                <div class="col-md-9">
+                    <h1 class="movie-detail-title">{{ movie.title }}</h1>
+                    {% if movie.tagline %}
+                    <p class="movie-detail-tagline">"{{ movie.tagline }}"</p>
+                    {% endif %}
+
+                    <div class="movie-detail-meta">
+                        <span><i class="fas fa-calendar"></i> {{ movie.release_date }}</span>
+                        <span><i class="fas fa-clock"></i> {{ movie.runtime }} min</span>
+                        <span><i class="fas fa-star text-warning"></i> {{ movie.vote_average|floatformat:1 }}/10</span>
+                        <span><i class="fas fa-users"></i> {{ movie.vote_count }} votes</span>
+                        <span><i class="fas fa-fire"></i> {{ movie.popularity|floatformat:0 }}</span>
+                    </div>
+
+                    <div class="mb-3">
+                        {% for genre in movie.genres %}
+                        <span class="genre-pill">{{ genre.name }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <p class="lead">{{ movie.overview }}</p>
+
+                    <div class="d-flex gap-2 mb-3">
+                        <button class="btn btn-danger"
+                            onclick="toggleWatchlist('{{ movie.id }}', '{{ movie.title }}', '{{ movie.poster_path }}')">
+                            <i class="fas {% if in_watchlist %}fa-heart{% else %}fa-heart{% endif %}"></i>
+                            {% if in_watchlist %}In Watchlist{% else %}Add to Watchlist{% endif %}
+                        </button>
+                        <button class="btn btn-outline-light"
+                            onclick="toggleLike('{{ movie.id }}', '{{ movie.title }}', '{{ movie.poster_path }}')">
+                            <i class="fas {% if is_liked %}fa-thumbs-up{% else %}fa-thumbs-up{% endif %}"></i>
+                            {% if is_liked %}Liked{% else %}Like{% endif %}
+                        </button>
+                        {% if movie.videos %}
+                        <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#trailerModal">
+                            <i class="fas fa-play"></i> Watch Trailer
+                        </button>
+                        {% endif %}
+                    </div>
+
+                    {% if movie.production_companies %}
+                    <div>
+                        <small class="text-muted">Production: </small>
+                        {% for company in movie.production_companies %}
+                        <span class="text-light">{{ company.name }}</span>{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <!-- Cast -->
+    {% if movie.cast %}
+    <section class="mb-5">
+        <h3 class="mb-3"><i class="fas fa-users"></i> Cast</h3>
+        <div class="row g-3">
+            {% for actor in movie.cast|slice:":6" %}
+            <div class="col-4 col-md-2">
+                <div class="text-center">
+                    {% if actor.profile_path %}
+                    <img src="https://image.tmdb.org/t/p/w200{{ actor.profile_path }}" alt="{{ actor.name }}"
+                        class="rounded-circle img-fluid" style="width: 100px; height: 100px; object-fit: cover;">
+                    {% else %}
+                    <div class="rounded-circle bg-secondary mx-auto"
+                        style="width: 100px; height: 100px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-user fa-3x"></i>
+                    </div>
+                    {% endif %}
+                    <p class="mt-2 mb-0"><strong>{{ actor.name }}</strong></p>
+                    <small class="text-muted">{{ actor.character }}</small>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Similar Movies (AI) -->
+    {% if movie.similar_movies %}
+    <section class="mb-5">
+        <div class="section-header">
+            <h3><i class="fas fa-robot text-primary"></i> AI Similar Movies</h3>
+        </div>
+        <div class="row g-3">
+            {% for similar in movie.similar_movies %}
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="movie-card" onclick="window.location.href='{% url 'movies:movie_detail' similar.id %}'">
+                    <div class="poster-wrapper">
+                        {% if similar.poster_path %}
+                        <img src="https://image.tmdb.org/t/p/w500{{ similar.poster_path }}" alt="{{ similar.title }}"
+                            loading="lazy">
+                        {% else %}
+                        <img src="{% static 'images/no-poster.png' %}" alt="No poster" loading="lazy">
+                        {% endif %}
+                        {% if similar.similarity_score %}
+                        <div class="position-absolute bottom-0 start-0 m-2">
+                            <span class="badge bg-success">{{ similar.similarity_score|floatformat:2 }}% match</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h6 class="movie-title">{{ similar.title }}</h6>
+                        <div class="movie-meta">
+                            <span class="rating">
+                                <i class="fas fa-star"></i> {{ similar.vote_average|floatformat:1|default:"N/A" }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+<!-- Trailer Modal -->
+{% if movie.videos %}
+<div class="modal fade trailer-modal" id="trailerModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Watch Trailer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="ratio ratio-16x9">
+                    <iframe src="https://www.youtube.com/embed/{{ movie.videos.0.key }}" allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Toast Container -->
+<div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999;"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize button states
+        {% if in_watchlist %}
+        updateWatchlistIcon('{{ movie.id }}', true);
+        {% endif %}
+        {% if is_liked %}
+        updateLikeIcon('{{ movie.id }}', true);
+        {% endif %}
+    });
+</script>
+{% endblock %}

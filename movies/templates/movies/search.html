@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Search Results - AI Movie Recommender{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">
+        <i class="fas fa-search"></i> Search Results
+        {% if query %}
+        <small class="text-muted">for "{{ query }}"</small>
+        {% endif %}
+    </h2>
+
+    {% if query %}
+    {% if results %}
+    <p class="text-muted">Found {{ total_results }} results</p>
+    <div class="row g-3">
+        {% for movie in results %}
+        <div class="col-6 col-md-4 col-lg-3">
+            <div class="movie-card" onclick="window.location.href='{% url 'movies:movie_detail' movie.id %}'">
+                <div class="poster-wrapper">
+                    {% if movie.poster_path %}
+                    <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}"
+                        loading="lazy">
+                    {% else %}
+                    <img src="{% static 'images/no-poster.png' %}" alt="No poster" loading="lazy">
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <h6 class="movie-title">{{ movie.title }}</h6>
+                    <div class="movie-meta">
+                        <span>{{ movie.release_date|slice:":4"|default:"N/A" }}</span>
+                        <span class="rating">
+                            <i class="fas fa-star"></i> {{ movie.vote_average|floatformat:1|default:"N/A" }}
+                        </span>
+                    </div>
+                    <p class="movie-overview">{{ movie.overview|truncatechars:80 }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if total_results > 20 %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item">
+                <a class="page-link" href="?q={{ query }}&page=1">First</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?q={{ query }}&page=2">2</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?q={{ query }}&page=3">3</a>
+            </li>
+        </ul>
+    </nav>
+    {% endif %}
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-film fa-4x text-muted mb-3"></i>
+        <h4>No results found for "{{ query }}"</h4>
+        <p class="text-muted">Try adjusting your search terms</p>
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-search fa-4x text-muted mb-3"></i>
+        <h4>Search for movies</h4>
+        <p class="text-muted">Enter a movie title, genre, or actor name</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

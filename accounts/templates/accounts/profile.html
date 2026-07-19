@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - AI Movie Recommender{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-body text-center">
+                    <div class="avatar-circle mb-3">
+                        <i class="fas fa-user fa-4x text-primary"></i>
+                    </div>
+                    <h4>{{ user.username }}</h4>
+                    <p class="text-muted">{{ user.email }}</p>
+                    <hr>
+                    <p><strong>Favorite Genres:</strong></p>
+                    <div class="d-flex flex-wrap justify-content-center gap-2">
+                        {% for genre in profile.get_favorite_genres_display %}
+                        <span class="badge bg-primary">{{ genre }}</span>
+                        {% empty %}
+                        <span class="text-muted">No genres selected</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h4 class="card-title">Activity Summary</h4>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="stat-box">
+                                <h3>{{ user.watch_history.count }}</h3>
+                                <p class="text-muted">Movies Watched</p>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-box">
+                                <h3>{{ user.liked_movies.count }}</h3>
+                                <p class="text-muted">Movies Liked</p>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-box">
+                                <h3>{{ user.watchlist.count }}</h3>
+                                <p class="text-muted">Watchlist</p>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <h5>Recent Watch History</h5>
+                    <div class="row">
+                        {% for history in user.watch_history.all|slice:":6" %}
+                        <div class="col-6 col-md-4 mb-3">
+                            <div class="card bg-dark text-white h-100">
+                                {% if history.poster_path %}
+                                <img src="https://image.tmdb.org/t/p/w200{{ history.poster_path }}" class="card-img-top"
+                                    alt="{{ history.movie_title }}">
+                                {% else %}
+                                <div class="card-img-top bg-secondary" style="height: 150px;"></div>
+                                {% endif %}
+                                <div class="card-body p-2 text-center">
+                                    <small class="text-truncate d-block">{{ history.movie_title }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted">No watch history yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

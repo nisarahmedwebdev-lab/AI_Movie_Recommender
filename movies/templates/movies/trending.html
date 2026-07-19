@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - AI Movie Recommender{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">
+        <i class="fas fa-fire text-danger"></i> {{ title }}
+    </h2>
+
+    {% if movies %}
+    <div class="row g-3">
+        {% for movie in movies %}
+        <div class="col-6 col-md-4 col-lg-3">
+            <div class="movie-card" onclick="window.location.href='{% url 'movies:movie_detail' movie.id %}'">
+                <div class="poster-wrapper">
+                    {% if movie.poster_path %}
+                    <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}"
+                        loading="lazy">
+                    {% else %}
+                    <img src="{% static 'images/no-poster.png' %}" alt="No poster" loading="lazy">
+                    {% endif %}
+                    <div class="card-overlay"></div>
+                    <div class="card-actions">
+                        <button class="btn-icon like-btn" data-movie-id="{{ movie.id }}"
+                            onclick="event.stopPropagation(); toggleLike('{{ movie.id }}', '{{ movie.title }}', '{{ movie.poster_path }}')">
+                            <i class="far fa-thumbs-up"></i>
+                        </button>
+                        <button class="btn-icon watchlist-btn" data-movie-id="{{ movie.id }}"
+                            onclick="event.stopPropagation(); toggleWatchlist('{{ movie.id }}', '{{ movie.title }}', '{{ movie.poster_path }}')">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h6 class="movie-title">{{ movie.title }}</h6>
+                    <div class="movie-meta">
+                        <span>{{ movie.release_date|slice:":4"|default:"N/A" }}</span>
+                        <span class="rating">
+                            <i class="fas fa-star"></i> {{ movie.vote_average|floatformat:1|default:"N/A" }}
+                        </span>
+                    </div>
+                    <p class="movie-overview">{{ movie.overview|truncatechars:80 }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-film fa-4x text-muted mb-3"></i>
+        <h4>No trending movies available</h4>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

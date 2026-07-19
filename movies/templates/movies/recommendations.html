@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}AI Recommendations{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2><i class="fas fa-robot text-primary"></i> AI Recommendations</h2>
+
+    <!-- Personalized -->
+    {% if personalized_recommendations %}
+    <section class="mb-4">
+        <h4><i class="fas fa-user-check text-primary"></i> For You</h4>
+        <div class="row g-2">
+            {% for movie in personalized_recommendations|slice:":12" %}
+            <div class="col-4 col-md-3 col-lg-2">
+                <div class="movie-card" onclick="location.href='{% url 'movies:movie_detail' movie.id %}'">
+                    <div class="poster-wrapper">
+                        <img src="https://image.tmdb.org/t/p/w300{{ movie.poster_path }}" alt="{{ movie.title }}"
+                            loading="lazy">
+                    </div>
+                    <div class="card-body p-1 text-center">
+                        <small class="d-block text-truncate">{{ movie.title }}</small>
+                        <small class="text-warning">⭐ {{ movie.vote_average|floatformat:1 }}</small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Trending -->
+    {% if trending_recommendations %}
+    <section class="mb-4">
+        <h4><i class="fas fa-fire text-danger"></i> Trending</h4>
+        <div class="row g-2">
+            {% for movie in trending_recommendations|slice:":8" %}
+            <div class="col-4 col-md-3 col-lg-2">
+                <div class="movie-card" onclick="location.href='{% url 'movies:movie_detail' movie.id %}'">
+                    <div class="poster-wrapper">
+                        <img src="https://image.tmdb.org/t/p/w300{{ movie.poster_path }}" alt="{{ movie.title }}"
+                            loading="lazy">
+                    </div>
+                    <div class="card-body p-1 text-center">
+                        <small class="d-block text-truncate">{{ movie.title }}</small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Explore -->
+    {% if explore_recommendations %}
+    <section class="mb-4">
+        <h4><i class="fas fa-compass text-success"></i> Explore</h4>
+        <div class="row g-2">
+            {% for movie in explore_recommendations|slice:":8" %}
+            <div class="col-4 col-md-3 col-lg-2">
+                <div class="movie-card" onclick="location.href='{% url 'movies:movie_detail' movie.id %}'">
+                    <div class="poster-wrapper">
+                        <img src="https://image.tmdb.org/t/p/w300{{ movie.poster_path }}" alt="{{ movie.title }}"
+                            loading="lazy">
+                    </div>
+                    <div class="card-body p-1 text-center">
+                        <small class="d-block text-truncate">{{ movie.title }}</small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Fallback: Popular -->
+    {% if not personalized_recommendations and not trending_recommendations and not explore_recommendations %}
+    <section>
+        <h4><i class="fas fa-star text-warning"></i> Popular Movies</h4>
+        <div class="row g-2">
+            {% for movie in popular_movies|slice:":12" %}
+            <div class="col-4 col-md-3 col-lg-2">
+                <div class="movie-card" onclick="location.href='{% url 'movies:movie_detail' movie.id %}'">
+                    <div class="poster-wrapper">
+                        <img src="https://image.tmdb.org/t/p/w300{{ movie.poster_path }}" alt="{{ movie.title }}"
+                            loading="lazy">
+                    </div>
+                    <div class="card-body p-1 text-center">
+                        <small class="d-block text-truncate">{{ movie.title }}</small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}
